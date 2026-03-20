@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log Analyzer Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 24px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-rows: auto 1fr 1fr;
+            height: calc(100vh - 40px);
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .top-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .card h2 {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #94a3b8;
+        }
+
+        .card p {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .chart-container {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bottom {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .list-box {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        ul {
+            padding-left: 15px;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        li {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📊 Log Analyzer</h1>
+
+<div class="container">
+
+    <!-- TOP CARDS -->
+    <div class="top-cards">
+        <div class="card">
+            <h2>Total</h2>
+            <p>{{ data.total }}</p>
+        </div>
+
+        <div class="card">
+            <h2>2xx</h2>
+            <p>{{ data.status.get("2xx", 0) }}</p>
+        </div>
+
+        <div class="card">
+            <h2>4xx</h2>
+            <p>{{ data.status.get("4xx", 0) }}</p>
+        </div>
+
+        <div class="card">
+            <h2>5xx</h2>
+            <p>{{ data.status.get("5xx", 0) }}</p>
+        </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-container">
+        <canvas id="statusChart"></canvas>
+    </div>
+
+    <!-- BOTTOM LISTS -->
+    <div class="bottom">
+
+        <div class="list-box">
+            <h3>Top IPs</h3>
+            <ul>
+                {% for ip, count in data.top_ips %}
+                    <li>{{ ip }} — {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="list-box">
+            <h3>Top Paths</h3>
+            <ul>
+                {% for path, count in data.top_paths %}
+                    <li>{{ path }} — {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const statusData = {
+    labels: ["2xx", "3xx", "4xx", "5xx"],
+    datasets: [{
+        data: [
+            {{ data.status.get("2xx", 0) }},
+            {{ data.status.get("3xx", 0) }},
+            {{ data.status.get("4xx", 0) }},
+            {{ data.status.get("5xx", 0) }}
+        ],
+        backgroundColor: [
+            "#22c55e",
+            "#3b82f6",
+            "#f59e0b",
+            "#ef4444"
+        ]
+    }]
+};
+
+new Chart(document.getElementById("statusChart"), {
+    type: "doughnut",
+    data: statusData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+
+</body>
+</html>
